@@ -38,10 +38,10 @@ typedef enum{
     dead
 }state_machine_t;
 
+state_machine_t currentState = start;
+
 int main(void)
 {
-    state_machine_t currentState = start;
-
     while(1)
     {
         delay_ms(100);
@@ -53,8 +53,7 @@ int main(void)
 
         switch(currentState){
             case start:
-                if(switch1_pressed)
-                {
+                if(switch1_pressed){
                     currentState = light_sensor;
                 }
                 break;
@@ -120,39 +119,35 @@ int main(void)
                 /* Use 1Khz PWM.  Each PWM shares the 1st frequency you set */
                 PWM motor1(PWM::pwm1, 1000); //frequency?
 
-                if(temp > 50)
-                {
+                if(temp > 50){
                     // body not complete
                     /* Set to 50% motor speed */
                     motor1.set(50);
                 }
 
-                if(temp > 72)
-                {
+                if(temp > 72){
                     //increase the fan speed
                     motor1.set(75);
                 }
 
-                if(temp < 72 && temp > 50)
-                {
+                if(temp < 72 && temp > 50){
                     //decrease the fan speed
                     motor1.set(25);
                 }
 
-                if(switch3_pressed)
-                {
+                if(switch3_pressed){
                     LE.on(1);
                     currentState = light_sensor;
                     LE.off(1);
                 }
-                else if(switch3_pressed)
-                {
+
+                else if(switch3_pressed){
                     LE.on(2);
                     currentState = motion_sensor;
                     LE.off(2);
                 }
-                }
-                break;
+            }
+            break;
 
             case motion_sensor:
 
@@ -162,44 +157,37 @@ int main(void)
                 x = ((x + 1024)/2048)*100;
                 y = ((x + 1024)/2048)*100;
 
-                if(x < 49)
-                {
+                if(x < 49){
                     //turn on LED strip 1 (left side)
                 }
-                else if(x > 51)
-                {
+
+                else if(x > 51){
                     //turn on LED strip 2 (right side)
                 }
-                else if(y < 49)
-                {
+
+                else if(y < 49){
                     //turn on LED strip 3 (bottom)
                 }
-                else if(y > 51)
-                {
+
+                else if(y > 51){
                     //turn on LED strip 4 (top)
                 }
 
-                if(switch2_pressed)
-                {
+                if(switch2_pressed){
                     currentState = light_sensor;
                 }
 
-                if(switch3_pressed)
-                {
+                if(switch3_pressed){
                     currentState = temp_fan;
                 }
 
-                if(switch4_pressed)
-                {
+                if(switch4_pressed){
                     currentState = dead;
                 }
                 break;
 
             case dead:
-
-                if(switch4_pressed)
-                {
-
+                if(switch4_pressed){
                     exit(0);
                 }
                 break;
