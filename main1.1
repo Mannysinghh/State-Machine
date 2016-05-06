@@ -40,8 +40,6 @@ typedef enum{
 int main(void)
 {
     state_machine_t currentState = start;
-
-
     while(1)
     {
         delay_ms(100);
@@ -51,23 +49,11 @@ int main(void)
         bool switch3_pressed = SW.getSwitch(3);
         bool switch4_pressed = SW.getSwitch(4);
 
-        printf("Press button 0 to START.\n");
-
         switch(currentState)
         {
             case start:
                 if(switch1_pressed)
                 {
-                    LE.on(1); LE.off(1);
-                    LE.on(2);LE.off(2);
-                    LE.on(3);LE.off(3);
-                    LE.on(4);LE.off(4);
-
-                    LE.on(4); LE.off(4);
-                    LE.on(3);LE.off(3);
-                    LE.on(2);LE.off(2);
-                    LE.on(1);LE.off(1);
-
                     currentState = light_sensor;
                 }
             break;
