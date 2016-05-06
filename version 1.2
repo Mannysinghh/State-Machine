@@ -113,7 +113,7 @@ int main(void)
                 break;
 
             case temp_fan:
-
+            if(switch2_pressed){
                 printf("Current State: LIGHT_SENSOR. Press button 2 to go to MOTION_SENSOR.\n");
                 int temp;
                 temp = TS.getFarenheit();
@@ -150,6 +150,7 @@ int main(void)
                     LE.on(2);
                     currentState = motion_sensor;
                     LE.off(2);
+                }
                 }
                 break;
 
