@@ -1,28 +1,3 @@
-Enter file contents here
-/*
- *     SocialLedge.com - Copyright (C) 2013
- *
- *     This file is part of free software framework for embedded processors.
- *     You can use it and/or distribute it as long as this copyright header
- *     remains unmodified.  The code is free for personal use and requires
- *     permission to use in a commercial product.
- *
- *      THIS SOFTWARE IS PROVIDED "AS IS".  NO WARRANTIES, WHETHER EXPRESS, IMPLIED
- *      OR STATUTORY, INCLUDING, BUT NOT LIMITED TO, IMPLIED WARRANTIES OF
- *      MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE APPLY TO THIS SOFTWARE.
- *      I SHALL NOT, IN ANY CIRCUMSTANCES, BE LIABLE FOR SPECIAL, INCIDENTAL, OR
- *      CONSEQUENTIAL DAMAGES, FOR ANY REASON WHATSOEVER.
- *
- *     You can reach the author of this software at :
- *          p r e e t . w i k i @ g m a i l . c o m
- */
-
-/**
- * @file
- * @brief This is the application entry point.
- */
-
-
 #include <stdio.h>
 #include "utilities.h"  // delay_ms()
 #include "io.hpp"       // board IO
@@ -32,16 +7,26 @@ Enter file contents here
 
 typedef enum{
     start,
-    light_sensor,
+    lightSensor,
     temp_fan,
-    motion_sensor,
+    motionSensor,
     dead
 }state_machine_t;
 
-state_machine_t currentState = start;
+//GPIO myPin23(P1_23);
+//GPIO myPin1(P1_19);
+//GPIO myPin2(P1_20);
+//GPIO myPin3(P1_22);
+//myPin1.setAsOutput();
+//myPin2.setAsOutput();
+//myPin3.setAsOutput();
+//myPin23.setAsOutput();
+
+
 
 int main(void)
 {
+    state_machine_t currentState = start;
     while(1)
     {
         delay_ms(100);
@@ -50,110 +35,113 @@ int main(void)
         bool switch2_pressed = SW.getSwitch(2);
         bool switch3_pressed = SW.getSwitch(3);
         bool switch4_pressed = SW.getSwitch(4);
+        GPIO pin28(P1_28);
+        GPIO pin23(P1_23);
+        GPIO pin29(P1_29);
+        pin28.setAsOutput();
+        pin23.setAsOutput();
+        pin29.setAsOutput();
+        float x = AS.getX();
+        float y = AS.getY();
+        float light_value = 0;
+        float percent = 0;
+        pin28.setLow();
+        pin29.setLow();
+        pin23.setLow();
 
         switch(currentState){
             case start:
                 if(switch1_pressed){
-                    currentState = light_sensor;
+                    printf("Current State: START. Press button 2 to go to LED\n");
+                    currentState = lightSensor;
                 }
                 break;
 
-            case light_sensor:
-                if(switch2_pressed)
+            case lightSensor:
+                while(switch2_pressed)
                 {
                     //printf("Current State: START. Press button 1 to go to TEMP_FAN.\n");
-                    float light_value = LS.getRawValue();
-                    float percent = (light_value / 4096)*100;
+                    light_value = LS.getRawValue();
+                    percent =  (light_value / 4096)*100;
                     bool condition = true;
                     while(condition){
                         if(percent < 33.3)
                         {
-                            //turn on the YELLOW LED
-                            GPIO pin20(P1_20);
-                            pin20.setAsOutput();
-
-                            pin20.setLow();
-
-                            delay_ms(100);
-                            pin20.setHigh();
-
+                            pin28.setLow();
+                            pin23.setLow();
+                            //turn on the GREEN LED
                             LD.setNumber(percent);
+                            pin29.setHigh();
+                            //pin29.setLow();
+                            //delay_ms(100);
                             condition = false;
-                            currentState = temp_fan;
+                            //currentState = temp_fan;
                         }
                         if(percent > 33.3 && percent < 66.6){
+                            pin29.setLow();
+                            pin23.setLow();
                             //turn on the RED LED
-                            GPIO pin20(P1_20);
-                            pin20.setAsOutput();
-
-                            pin20.setLow();
-
-                            delay_ms(100);
-                            pin20.setHigh();
                             LD.setNumber(percent);
+                            pin28.setHigh();
+                            //pin28.setLow();
+                            //delay_ms(100);
                             condition = false;
-                            currentState = temp_fan;
+                            //currentState = temp_fan;
                         }
                         if(percent > 66.6 && percent < 100){
+                            pin29.setLow();
+                            pin28.setLow();
                             //turn on the BLUE LED
-                            GPIO pin20(P1_20);
-                            pin20.setAsOutput();
-
-                            pin20.setLow();
-
-                            delay_ms(100);
-                            pin20.setHigh();
                             LD.setNumber(percent);
+                            pin23.setHigh();
+                            //pin30.setLow();
+                            //delay_ms(100);
                             condition = false;
-                            currentState = temp_fan;
+                            //currentState = temp_fan;
                         }
                     }
                 }
                 break;
 
             case temp_fan:
-            if(switch2_pressed){
-                printf("Current State: LIGHT_SENSOR. Press button 2 to go to MOTION_SENSOR.\n");
-                int temp;
-                temp = TS.getFarenheit();
-                /* Use 1Khz PWM.  Each PWM shares the 1st frequency you set */
-                PWM motor1(PWM::pwm1, 1000); //frequency?
-
-                if(temp > 50){
-                    // body not complete
-                    /* Set to 50% motor speed */
-                    motor1.set(50);
-                }
-
-                if(temp > 72){
-                    //increase the fan speed
-                    motor1.set(75);
-                }
-
-                if(temp < 72 && temp > 50){
-                    //decrease the fan speed
-                    motor1.set(25);
-                }
-
                 if(switch3_pressed){
-                    LE.on(1);
-                    currentState = light_sensor;
-                    LE.off(1);
+                    printf("Current State: LIGHT_SENSOR. Press button 2 to go to MOTION_SENSOR.\n");
+                    int temp;
+                    temp = TS.getFarenheit();
+                    /* Use 1Khz PWM.  Each PWM shares the 1st frequency you set */
+                    PWM motor1(PWM::pwm1, 1000); //frequency?
+
+                    if(temp > 50){
+                        // body not complete
+                        /* Set to 50% motor speed */
+                        motor1.set(50);
+                    }
+
+                    if(temp > 72){
+                        //increase the fan speed
+                        motor1.set(75);
+                    }
+
+                    if(temp < 72 && temp > 50){
+                        //decrease the fan speed
+                        motor1.set(25);
+                    }
+
+                    if(switch3_pressed){
+                        LE.on(1);
+                        currentState = lightSensor;
+                        LE.off(1);
+                    }
+
+                    else if(switch3_pressed){
+                        LE.on(2);
+                        currentState = motionSensor;
+                        LE.off(2);
+                    }
                 }
+                break;
 
-                else if(switch3_pressed){
-                    LE.on(2);
-                    currentState = motion_sensor;
-                    LE.off(2);
-                }
-            }
-            break;
-
-            case motion_sensor:
-
-                float x = AS.getX();
-                float y = AS.getY();
-
+            case motionSensor:
                 x = ((x + 1024)/2048)*100;
                 y = ((x + 1024)/2048)*100;
 
@@ -174,7 +162,7 @@ int main(void)
                 }
 
                 if(switch2_pressed){
-                    currentState = light_sensor;
+                    currentState = lightSensor;
                 }
 
                 if(switch3_pressed){
@@ -185,6 +173,7 @@ int main(void)
                     currentState = dead;
                 }
                 break;
+
 
             case dead:
                 if(switch4_pressed){
@@ -199,4 +188,8 @@ int main(void)
         }
     }
 }
+
+
+
+
 
