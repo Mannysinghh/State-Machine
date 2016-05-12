@@ -72,8 +72,6 @@ int main(void)
                             //turn on the GREEN LED
                             LD.setNumber(percent);
                             pin29.setHigh();
-                            //pin29.setLow();
-                            //delay_ms(100);
                             condition = false;
                             //currentState = temp_fan;
                         }
@@ -83,8 +81,6 @@ int main(void)
                             //turn on the RED LED
                             LD.setNumber(percent);
                             pin28.setHigh();
-                            //pin28.setLow();
-                            //delay_ms(100);
                             condition = false;
                             //currentState = temp_fan;
                         }
@@ -94,49 +90,63 @@ int main(void)
                             //turn on the BLUE LED
                             LD.setNumber(percent);
                             pin23.setHigh();
-                            //pin30.setLow();
-                            //delay_ms(100);
                             condition = false;
                             //currentState = temp_fan;
                         }
+                        if(switch3_pressed){
+                            break;
+                        }
+                    }
+                    if(switch3_pressed){
+                        currentState = temp_fan;
+                        break;
                     }
                 }
                 break;
-
             case temp_fan:
-                if(switch3_pressed){
+                while(switch3_pressed){
                     printf("Current State: LIGHT_SENSOR. Press button 2 to go to MOTION_SENSOR.\n");
-                    int temp;
-                    temp = TS.getFarenheit();
+                    light_value = LS.getRawValue();
+                    percent =  (light_value / 4096)*100;
+                    bool condition = true;
                     /* Use 1Khz PWM.  Each PWM shares the 1st frequency you set */
                     PWM motor1(PWM::pwm1, 1000); //frequency?
 
-                    if(temp > 50){
-                        // body not complete
-                        /* Set to 50% motor speed */
-                        motor1.set(50);
-                    }
+                    while(condition){
+                        if(percent < 33.3){
+                            //TURN ON THE GREEN LED
+                            pin28.setLow();
+                            pin23.setLow();
+                            LD.setNumber(percent);
+                            pin29.setHigh();
+                            motor1.set(10);
+                        }
+                        if(percent > 33.3 && percent < 66.6){
+                            //TURN ON THE RED LED
+                            /* Set to 50% motor speed */
 
-                    if(temp > 72){
-                        //increase the fan speed
-                        motor1.set(75);
+                            pin29.setLow();
+                            pin23.setLow();
+                            LD.setNumber(percent);
+                            pin28.setHigh();
+                            motor1.set(30);
+                        }
+                        if(percent > 66.6 && percent < 100){
+                            //TURN ON THE BLUE LED
+                            pin29.setLow();
+                            pin28.setLow();
+                            //turn on the BLUE LED
+                            LD.setNumber(percent);
+                            pin23.setHigh();
+                            motor1.set(100);
+                        }
+                        if(switch4_pressed){
+                            break;
+                        }
                     }
-
-                    if(temp < 72 && temp > 50){
-                        //decrease the fan speed
-                        motor1.set(25);
-                    }
-
-                    if(switch3_pressed){
-                        LE.on(1);
-                        currentState = lightSensor;
-                        LE.off(1);
-                    }
-
-                    else if(switch3_pressed){
-                        LE.on(2);
+                    if(switch4_pressed){
                         currentState = motionSensor;
-                        LE.off(2);
+                        break;
                     }
                 }
                 break;
@@ -147,28 +157,24 @@ int main(void)
 
                 if(x < 49){
                     //turn on LED strip 1 (left side)
+                    pin28.setLow();
+                    pin23.setLow();
+                    pin29.setHigh();
                 }
 
                 else if(x > 51){
                     //turn on LED strip 2 (right side)
+                    pin29.setLow();
+                    pin23.setLow();
+                    pin28.setHigh();
                 }
 
                 else if(y < 49){
                     //turn on LED strip 3 (bottom)
+                    pin29.setLow();
+                    pin28.setLow();
+                    pin23.setHigh();
                 }
-
-                else if(y > 51){
-                    //turn on LED strip 4 (top)
-                }
-
-                if(switch2_pressed){
-                    currentState = lightSensor;
-                }
-
-                if(switch3_pressed){
-                    currentState = temp_fan;
-                }
-
                 if(switch4_pressed){
                     currentState = dead;
                 }
@@ -188,11 +194,7 @@ int main(void)
         }
     }
 }
-<<<<<<< Updated upstream
 
 
 
 
-
-=======
->>>>>>> Stashed changes
